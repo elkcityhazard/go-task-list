@@ -1,1 +1,108 @@
 package render
+
+import (
+	"bytes"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+	"path/filepath"
+
+	"github.com/elkcityhazard/go-task-list/internal/config"
+)
+
+var funcMap template.FuncMap
+
+var app *config.AppConfig
+
+//	NewRenderer passes the current appconfig to the render package so it can
+//	have access to the app config struct and whatever the current context is
+
+func NewRenderer(a *config.AppConfig) {
+	app = a
+}
+
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td config.TemplateData) {
+
+	tc := app.TemplateCache
+
+	t, ok := tc[tmpl]
+
+	if !ok {
+		log.Fatalln("error creating template cache")
+		return
+	}
+
+	buf := new(bytes.Buffer)
+
+	err := t.Execute(buf, td)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = buf.WriteTo(w)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
+func CreateTemplateCache() (map[string]*template.Template, error) {
+
+	myCache := map[string]*template.Template{}
+
+	pages, err := filepath.Glob("./templates/pages/*.tmpl.html")
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	for _, page := range pages {
+		name := filepath.Base(page)
+
+		tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(page)
+
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+
+		matches, err := filepath.Glob("./templates/layouts/*.tmpl.html")
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if len(matches) > 0 {
+			tmpl, err = tmpl.ParseGlob("./templates/layouts/*.tmpl.html")
+
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+
+		}
+
+		partials, err := filepath.Glob("./templates/partials/*.tmpl.html")
+
+		if err != nil {
+			return nil, err
+		}
+
+		if len(partials) > 0 {
+			tmpl, err = tmpl.ParseGlob("./templates/partials/*.tmpl.html")
+
+			if err != nil {
+				return nil, err
+			}
+		}
+		myCache[name] = tmpl
+	}
+
+	return myCache, nil
+
+}

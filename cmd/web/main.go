@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"personal.github.com/elkcityhazard/go-task-list/internal/config"
 	"strconv"
+
+	"github.com/elkcityhazard/go-task-list/internal/config"
+	"github.com/elkcityhazard/go-task-list/internal/render"
 )
 
 var app config.AppConfig
@@ -14,6 +16,14 @@ var app config.AppConfig
 func main() {
 
 	app.IsProduction = false
+
+	td, err := render.CreateTemplateCache()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	app.TemplateCache = td
 
 	flag.StringVar(&app.Port, "port", ":8080", "the port the application listens on")
 	isProduction := flag.String("Environment", "false", "Set the environment [production | development ]")
@@ -26,9 +36,11 @@ func main() {
 		Handler: routes(),
 	}
 
+	render.NewRenderer(&app)
+
 	fmt.Printf("starting server on %s", srv.Addr)
 
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 
 	if err != nil {
 		log.Fatalln(err)

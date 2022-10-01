@@ -1,3 +1,3 @@
-module personal.github.com/elkcityhazard/go-task-list
+module github.com/elkcityhazard/go-task-list
 
-go 1.19
+go 1.18

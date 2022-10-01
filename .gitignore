@@ -15,3 +15,5 @@
 # vendor/
 
 .env
+/sql/
+/node_modules/

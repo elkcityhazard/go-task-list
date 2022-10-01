@@ -1,0 +1,14 @@
+
+{{ define "nav" }}
+
+<nav class="main-nav container mx-auto p-3 text-center">
+    {{ with .MainNavigation }}
+
+    {{ range . }}
+    <a href="{{ .URL }}">{{ .Name }}</a>
+
+    {{ end }}
+    {{ end }}
+</nav>
+
+{{ end }}

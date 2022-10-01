@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/elkcityhazard/go-task-list/internal/handlers"
 	"net/http"
-
-	"github.com/elkcityhazard/go-task-list/internal/config"
-	"github.com/elkcityhazard/go-task-list/internal/render"
 )
 
 func routes() http.Handler {
@@ -14,13 +12,15 @@ func routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./static/"))
 
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		render.RenderTemplate(w, r, "home.tmpl.html", config.TemplateData{Title: "Hello World"})
+		handlers.Home(w, r)
 	}))
 
 	mux.Handle("/signup", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		switch r.Method {
 		case "GET":
+			handlers.GetSignUp(w, r)
+			break
 
 		}
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/elkcityhazard/go-task-list/internal/config"
@@ -29,13 +28,11 @@ func main() {
 	app.TemplateCache = td
 
 	flag.StringVar(&app.Port, "port", ":8080", "the port the application listens on")
-	flag.StringVar(&app.DSN, "DSN:", "", "SQL Data Source Name")
-	isProduction := flag.String("Environment", "false", "Set the environment [production | development ]")
+	flag.StringVar(&app.DSN, "DSN", "", "SQL Data Source Name")
+	flag.BoolVar(&app.IsProduction, "Environment", false, "Set the environment [production | development ]")
 	flag.Parse()
 
-	app.IsProduction, _ = strconv.ParseBool(*isProduction)
-
-	db, err := sql.Open("mysql", "user:password@/dbname")
+	db, err := sql.Open("mysql", app.DSN)
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +51,7 @@ func main() {
 	}
 
 	app.DB = db
+	app.InitializeMenu()
 
 	srv := &http.Server{
 		Addr:    app.Port,

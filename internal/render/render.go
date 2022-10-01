@@ -22,7 +22,14 @@ func NewRenderer(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td config.TemplateData) {
+func AddDefaultTemplateData(td *config.TemplateData, r *http.Request) *config.TemplateData {
+	td.SiteTitle = "Go Task List"
+	td.MainNavigation = app.InitializeMenu()
+
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *config.TemplateData) {
 
 	tc := app.TemplateCache
 
@@ -32,6 +39,8 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td conf
 		log.Fatalln("error creating template cache")
 		return
 	}
+
+	td = AddDefaultTemplateData(td, r)
 
 	buf := new(bytes.Buffer)
 

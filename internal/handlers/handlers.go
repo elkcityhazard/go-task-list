@@ -115,6 +115,61 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func Login(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		render.RenderTemplate(w, r, "login.tmpl.html", &models.TemplateData{})
+	case "POST":
+		err := r.ParseForm()
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		email := r.Form.Get("email")
+
+		ptPassword := r.Form.Get("password")
+
+		if len(email) == 0 {
+			http.Error(w, "invalid entry", http.StatusLengthRequired)
+			return
+		}
+
+		if len(ptPassword) == 0 {
+			http.Error(w, "invalid entry", http.StatusLengthRequired)
+			return
+		}
+
+		var user *models.User
+
+		user, err = user.GetSingleUser(app, email)
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(ptPassword))
+
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		app.SessionManager.Put(r.Context(), "id", strconv.Itoa(user.Id))
+
+		fmt.Println(user)
+
+		http.Redirect(w, r, "/tasks", http.StatusSeeOther)
+
+		render.RenderTemplate(w, r, "welcome.tmpl.html", &models.TemplateData{
+			Data: user,
+		})
+
+	}
+}
+
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 
 	session, ok := app.SessionManager.Get(r.Context(), "id").(string)
@@ -144,8 +199,85 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(taskList) >= 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	render.RenderTemplate(w, r, "task-list.tmpl.html", &models.TemplateData{
 		Data: taskList,
 	})
+
+}
+
+func CreateTask(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		session, ok := app.SessionManager.Get(r.Context(), "id").(string)
+
+		if !ok {
+			return
+		}
+
+		fmt.Println(session)
+
+		render.RenderTemplate(w, r, "new-task.tmpl.html", &models.TemplateData{})
+	case "POST":
+
+		err := r.ParseForm()
+
+		if err != nil {
+			http.Redirect(w, r, "/new-task", http.StatusSeeOther)
+			return
+		}
+
+		session, ok := app.SessionManager.Get(r.Context(), "id").(string)
+
+		if !ok {
+			return
+		}
+
+		stmt := `
+				INSERT INTO task (is_complete, title, body, user_id, created_at, updated_at) VALUES 
+				(?, ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+				`
+
+		var task models.Task
+		title := r.Form.Get("title")
+		body := r.Form.Get("body")
+
+		task.IsComplete = false
+		task.Title = title
+		task.Body = body
+		task.CreatedAt = time.Now()
+		task.UpdatedAt = time.Now()
+		id, ok := app.SessionManager.Get(r.Context(), "id").(string)
+
+		if !ok {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		intID, err := strconv.Atoi(id)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		task.UserId = intID
+
+		result, err := app.DB.Exec(stmt, 0, title, body, task.UserId)
+
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println(result.LastInsertId())
+
+		app.SessionManager.Put(r.Context(), "id", session)
+	}
 
 }

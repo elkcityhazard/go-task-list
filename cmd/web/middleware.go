@@ -13,7 +13,6 @@ func addDefaultHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-
 		next.ServeHTTP(w, r)
 	})
 }

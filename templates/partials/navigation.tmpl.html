@@ -9,6 +9,13 @@
 
     {{ end }}
     {{ end }}
+
+    {{ with .Data }}
+        {{ with .Email }}
+    <a href="/tasks">Tasks</a>
+
+    {{ end }}
+    {{ end }}
 </nav>
 
 {{ end }}

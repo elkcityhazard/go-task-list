@@ -15,6 +15,10 @@ func routes() http.Handler {
 
 	mux.Handle("/signup", addSessionManager(http.HandlerFunc(handlers.Signup)))
 
+	mux.Handle("/login", addSessionManager(http.HandlerFunc(handlers.Login)))
+
+	mux.Handle("/new-task", addSessionManager(http.HandlerFunc(handlers.CreateTask)))
+
 	mux.Handle("/tasks", addSessionManager(http.HandlerFunc(handlers.GetAllTasks)))
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))

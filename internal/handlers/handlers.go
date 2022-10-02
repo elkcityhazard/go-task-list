@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/elkcityhazard/go-task-list/internal/models"
@@ -90,7 +91,9 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.SessionManager.Put(r.Context(), "id", createdUser.Id)
+	fmt.Println(strconv.Itoa(createdUser.Id))
+
+	app.SessionManager.Put(r.Context(), "id", strconv.Itoa(createdUser.Id))
 
 	render.RenderTemplate(w, r, "signed-up.tmpl.html", &models.TemplateData{
 		Title:   "Thanks For Signing Up",
@@ -110,4 +113,17 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func GetAllTasks(w http.ResponseWriter, r *http.Request) {
+
+	session, ok := app.SessionManager.Get(r.Context(), "id").(string)
+
+	if !ok {
+		fmt.Println(session)
+		http.Error(w, "invalid session data", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprint(w, session)
 }

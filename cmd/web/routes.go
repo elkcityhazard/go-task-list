@@ -20,6 +20,8 @@ func routes() http.Handler {
 
 	mux.Post("/signup", handlers.Signup)
 
+	mux.Get("/tasks", handlers.GetAllTasks)
+
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	return mux

@@ -125,5 +125,27 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprint(w, session)
+	var user *models.User
+
+	query, err := user.GetSingleUserById(app, session)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var task *models.Task
+
+	taskList, err := task.FetchAllTasksForUser(app, r, fmt.Sprintf("%d", query.Id))
+
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+		return
+	}
+
+	render.RenderTemplate(w, r, "task-list.tmpl.html", &models.TemplateData{
+		Data: taskList,
+	})
+
 }

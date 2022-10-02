@@ -18,13 +18,6 @@ type User struct {
 	DB        *sql.DB
 }
 
-type Task struct {
-	Id         int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	IsComplete bool
-}
-
 func (u *User) Insert(a *AppConfig) (sql.Result, error) {
 	db := a.DB
 
@@ -45,6 +38,30 @@ func (u *User) GetSingleUser(a *AppConfig, s string) (*User, error) {
 
 	stmt := `
 		SELECT user_id, email, password, created_at, updated_at, is_admin FROM user WHERE email = ?;
+	`
+
+	row := a.DB.QueryRow(stmt, s)
+
+	user := &User{}
+
+	err := row.Scan(&user.Id, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.IsAdmin)
+
+	if err != nil {
+		fmt.Println(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("error fetching record")
+		} else {
+			return nil, err
+		}
+
+	}
+	return user, nil
+}
+
+func (u *User) GetSingleUserById(a *AppConfig, s string) (*User, error) {
+
+	stmt := `
+		SELECT user_id, email, password, created_at, updated_at, is_admin FROM user WHERE user_id = ?;
 	`
 
 	row := a.DB.QueryRow(stmt, s)

@@ -63,8 +63,8 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 	user.Email = email
 	user.Password = password
-	user.Created_At = time.Now()
-	user.Updated_At = time.Now()
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 	user.IsAdmin = IsFalse
 
 	res, err := user.Insert(app)
@@ -80,15 +80,17 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 	userMap["current"] = user
 
-	createdUser, err := user.GetSingleUser(app, user.Email)
+	createdUser, err := user.GetSingleUser(app, email)
+
+	fmt.Println(createdUser)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error thrown from createdUser: ", err)
 		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
 		return
 	}
 
-	app.SessionManager.Put(r.Context(), "ID", createdUser.Id)
+	app.SessionManager.Put(r.Context(), "id", createdUser.Id)
 
 	render.RenderTemplate(w, r, "signed-up.tmpl.html", &models.TemplateData{
 		Title:   "Thanks For Signing Up",

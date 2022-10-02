@@ -60,6 +60,8 @@ func main() {
 	sessionManager.Store = mysqlstore.New(app.DB)
 	sessionManager.Lifetime = 12 * time.Hour
 
+	app.SessionManager = sessionManager
+
 	srv := &http.Server{
 		Addr:    app.Port,
 		Handler: routes(),

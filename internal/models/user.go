@@ -8,20 +8,20 @@ import (
 )
 
 type User struct {
-	Id         int
-	Email      string
-	Password   []byte
-	Created_At time.Time
-	Updated_At time.Time
-	IsAdmin    int
-	Tasks      []Task
-	DB         *sql.DB
+	Id        int
+	Email     string
+	Password  []byte
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	IsAdmin   int
+	Tasks     []Task
+	DB        *sql.DB
 }
 
 type Task struct {
 	Id         int
-	Created_At time.Time
-	Updated_At time.Time
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 	IsComplete bool
 }
 
@@ -29,10 +29,10 @@ func (u *User) Insert(a *AppConfig) (sql.Result, error) {
 	db := a.DB
 
 	stmt := `
-		INSERT INTO user (email, password, created_at, updated_at, is_admin) VALUES (?, ?, ?, ?, ?)
+		INSERT INTO user (email, password, created_at, updated_at, is_admin) VALUES (?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP(), ?)
 	`
 
-	result, err := db.Exec(stmt, u.Email, u.Password, time.Now(), time.Now(), 0)
+	result, err := db.Exec(stmt, u.Email, u.Password, 0)
 
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (u *User) GetSingleUser(a *AppConfig, s string) (*User, error) {
 
 	user := &User{}
 
-	err := row.Scan(&user.Id, &user.Email, &user.Password, &user.Created_At, &user.Updated_At, &user.IsAdmin)
+	err := row.Scan(&user.Id, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.IsAdmin)
 
 	if err != nil {
 		fmt.Println(err)
@@ -79,12 +79,12 @@ func (u *User) GetAllUsers(a *AppConfig) ([]*User, error) {
 
 	defer rows.Close()
 
-	var users = []*User{}
+	var users []*User
 
 	for rows.Next() {
 		u := &User{}
 
-		err := rows.Scan(&u.Id, &u.Email, &u.Password, &u.Created_At, &u.Updated_At, &u.IsAdmin)
+		err := rows.Scan(&u.Id, &u.Email, &u.Password, &u.CreatedAt, &u.UpdatedAt, &u.IsAdmin)
 
 		if err != nil {
 			return nil, err

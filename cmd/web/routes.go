@@ -1,31 +1,27 @@
 package main
 
 import (
-	"fmt"
+	"github.com/go-chi/chi"
 	"net/http"
 
 	"github.com/elkcityhazard/go-task-list/internal/handlers"
 )
 
 func routes() http.Handler {
-	mux := http.NewServeMux()
+	mux := chi.NewRouter()
+	mux.Use(addSessionManager)
+	mux.Use(addDefaultHeaders)
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 
-	mux.HandleFunc("/", handlers.Home)
+	mux.Get("/", handlers.Home)
 
-	mux.HandleFunc("/signup", handlers.Signup)
+	mux.Get("/signup", handlers.Signup)
 
-	mux.Handle("/view", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Post("/signup", handlers.Signup)
 
-		key := r.URL.Path[len("/view/"):]
+	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
-		fmt.Println(key)
-	}))
+	return mux
 
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	addSessionManager(mux)
-
-	return addDefaultHeaders(mux)
 }

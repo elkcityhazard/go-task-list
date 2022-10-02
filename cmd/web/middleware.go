@@ -19,11 +19,5 @@ func addDefaultHeaders(next http.Handler) http.Handler {
 }
 
 func addSessionManager(next http.Handler) http.Handler {
-
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		app.SessionManager.LoadAndSave(next)
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
+	return app.SessionManager.LoadAndSave(next)
 }

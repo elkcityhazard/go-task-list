@@ -8,12 +8,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/elkcityhazard/go-task-list/internal/config"
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
+	"github.com/elkcityhazard/go-task-list/internal/handlers"
+	"github.com/elkcityhazard/go-task-list/internal/models"
 	"github.com/elkcityhazard/go-task-list/internal/render"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var app config.AppConfig
+var app models.AppConfig
 
 func main() {
 
@@ -53,12 +56,17 @@ func main() {
 	app.DB = db
 	app.InitializeMenu()
 
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(app.DB)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	srv := &http.Server{
 		Addr:    app.Port,
 		Handler: routes(),
 	}
 
 	render.NewRenderer(&app)
+	handlers.NewHandlers(&app)
 
 	fmt.Printf("starting server on %s", srv.Addr)
 

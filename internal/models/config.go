@@ -1,14 +1,19 @@
-package config
+package models
 
 import (
 	"database/sql"
 	"html/template"
+
+	"github.com/alexedwards/scs/v2"
 )
 
 type TemplateData struct {
 	SiteTitle      string
 	Title          string
 	MainNavigation []NavItem
+	Data           interface{}
+	StringMap      map[string]string
+	UserMap        map[string]User
 }
 
 type AppConfig struct {
@@ -19,6 +24,7 @@ type AppConfig struct {
 	MainNavigation []NavItem
 	DB             *sql.DB
 	IsProduction   bool
+	SessionManager *scs.SessionManager
 }
 
 type NavItem struct {

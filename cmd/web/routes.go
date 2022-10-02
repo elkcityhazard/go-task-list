@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/elkcityhazard/go-task-list/internal/handlers"
 	"net/http"
+
+	"github.com/elkcityhazard/go-task-list/internal/handlers"
 )
 
 func routes() http.Handler {
@@ -11,40 +12,9 @@ func routes() http.Handler {
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlers.Home(w, r)
-	}))
+	mux.HandleFunc("/", handlers.Home)
 
-	mux.Handle("/signup", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		switch r.Method {
-		case "GET":
-			handlers.GetSignUp(w, r)
-			break
-
-		}
-
-	}))
-
-	mux.Handle("/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	}))
-
-	mux.Handle("/create", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	}))
-
-	mux.Handle("/update", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	}))
-
-	mux.Handle("/read", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	}))
-
-	mux.Handle("/delete", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	}))
+	mux.HandleFunc("/signup", handlers.Signup)
 
 	mux.Handle("/view", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -54,6 +24,8 @@ func routes() http.Handler {
 	}))
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
+	addSessionManager(mux)
 
 	return addDefaultHeaders(mux)
 }

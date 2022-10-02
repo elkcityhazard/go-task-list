@@ -8,30 +8,38 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/elkcityhazard/go-task-list/internal/config"
+	"github.com/elkcityhazard/go-task-list/internal/models"
 )
 
 var funcMap template.FuncMap
 
-var app *config.AppConfig
+var app *models.AppConfig
 
 //	NewRenderer passes the current appconfig to the render package so it can
 //	have access to the app config struct and whatever the current context is
 
-func NewRenderer(a *config.AppConfig) {
+func NewRenderer(a *models.AppConfig) {
 	app = a
 }
 
-func AddDefaultTemplateData(td *config.TemplateData, r *http.Request) *config.TemplateData {
+func AddDefaultTemplateData(td *models.TemplateData, r *http.Request) *models.TemplateData {
 	td.SiteTitle = "Go Task List"
 	td.MainNavigation = app.InitializeMenu()
 
 	return td
 }
 
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *config.TemplateData) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
 
-	tc := app.TemplateCache
+	var tc map[string]*template.Template
+
+	if app.IsProduction {
+		tc = app.TemplateCache
+	}
+
+	if !app.IsProduction {
+		tc, _ = CreateTemplateCache()
+	}
 
 	t, ok := tc[tmpl]
 

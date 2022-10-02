@@ -1,0 +1,19 @@
+{
+  "name": "go-task-list",
+  "version": "1.0.0",
+  "description": "A crud task list to be deleted later",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@personal.github.com:elkcityhazard/go-task-list.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.55.0"
+  }
+}

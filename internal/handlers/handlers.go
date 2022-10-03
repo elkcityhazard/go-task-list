@@ -238,6 +238,11 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 		render.RenderTemplate(w, r, "new-task.tmpl.html", &models.TemplateData{})
 	case "POST":
 
+		if !app.SessionManager.Exists("id") {
+			http.Redirect(w, r, "/login", http.StatusNotFound)
+			return
+		}
+
 		err := r.ParseForm()
 
 		if err != nil {

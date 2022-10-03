@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,7 +14,7 @@ type Task struct {
 	Title      string
 	Body       string
 	UserId     int
-	CommentId  int
+	CommentId  sql.NullInt32
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

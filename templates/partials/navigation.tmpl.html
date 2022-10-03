@@ -1,20 +1,24 @@
 
 {{ define "nav" }}
 
+{{$authVal := .IsAuthenticated }}
+
 <nav class="main-nav container mx-auto p-3 text-center">
     {{ with .MainNavigation }}
 
     {{ range . }}
-    <a href="{{ .URL }}">{{ .Name }}</a>
+    <a href="{{ .URL }}" class="{{ if and (eq $authVal 1)  ( eq .LoggedIn false) }} d-none {{ else }} d-inline  {{ end }}">{{ .Name }}</a>
 
     {{ end }}
     {{ end }}
 
-    {{ with .Data }}
-        {{ with .Email }}
+    {{ if eq .IsAuthenticated 1 }}
+    <a href="/logout">Logout</a>
     <a href="/tasks">Tasks</a>
+    {{ else}}
 
-    {{ end }}
+    <a href="/login">Login</a>
+
     {{ end }}
 </nav>
 

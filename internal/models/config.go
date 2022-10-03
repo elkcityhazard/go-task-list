@@ -8,12 +8,13 @@ import (
 )
 
 type TemplateData struct {
-	SiteTitle      string
-	Title          string
-	MainNavigation []NavItem
-	Data           interface{}
-	StringMap      map[string]string
-	UserMap        map[string]User
+	SiteTitle       string
+	Title           string
+	MainNavigation  []NavItem
+	Data            interface{}
+	StringMap       map[string]string
+	UserMap         map[string]User
+	IsAuthenticated int
 }
 
 type AppConfig struct {
@@ -28,9 +29,10 @@ type AppConfig struct {
 }
 
 type NavItem struct {
-	URL    string
-	Name   string
-	Weight int
+	URL      string
+	Name     string
+	Weight   int
+	LoggedIn bool
 }
 
 func (a *AppConfig) InitializeMenu() []NavItem {
@@ -41,14 +43,16 @@ func (a *AppConfig) InitializeMenu() []NavItem {
 			Weight: 1,
 		},
 		{
-			URL:    "/signup",
-			Name:   "Signup",
-			Weight: 2,
+			URL:      "/signup",
+			Name:     "Signup",
+			Weight:   2,
+			LoggedIn: false,
 		},
 		{
-			URL:    "/login",
-			Name:   "Login",
-			Weight: 3,
+			URL:      "/new-task",
+			Name:     "New Task",
+			Weight:   3,
+			LoggedIn: true,
 		},
 	}
 

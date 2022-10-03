@@ -26,6 +26,10 @@ func AddDefaultTemplateData(td *models.TemplateData, r *http.Request) *models.Te
 	td.SiteTitle = "Go Task List"
 	td.MainNavigation = app.InitializeMenu()
 
+	if app.SessionManager.Exists(r.Context(), "id") {
+		td.IsAuthenticated = 1
+	}
+
 	return td
 }
 

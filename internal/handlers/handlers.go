@@ -118,6 +118,10 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+		if app.SessionManager.Exists(r.Context(), "id") {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
 		render.RenderTemplate(w, r, "login.tmpl.html", &models.TemplateData{})
 	case "POST":
 		err := r.ParseForm()
@@ -159,18 +163,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		app.SessionManager.Put(r.Context(), "id", strconv.Itoa(user.Id))
 
-		fmt.Println(user)
+		http.Redirect(w, r, "/new-task", http.StatusSeeOther)
 
-		http.Redirect(w, r, "/tasks", http.StatusSeeOther)
+		return
 
-		render.RenderTemplate(w, r, "welcome.tmpl.html", &models.TemplateData{
-			Data: user,
-		})
+		// render.RenderTemplate(w, r, "welcome.tmpl.html", &models.TemplateData{
+		// 	Data: user,
+		// })
 
 	}
 }
 
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
+
+	if !app.SessionManager.Exists(r.Context(), "id") {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
 	session, ok := app.SessionManager.Get(r.Context(), "id").(string)
 
@@ -199,7 +208,7 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(taskList) >= 0 {
+	if len(taskList) <= 0 {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -213,6 +222,11 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 func CreateTask(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+
+		if !app.SessionManager.Exists(r.Context(), "id") {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		}
+
 		session, ok := app.SessionManager.Get(r.Context(), "id").(string)
 
 		if !ok {
@@ -231,15 +245,14 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		session, ok := app.SessionManager.Get(r.Context(), "id").(string)
-
-		if !ok {
+		if !app.SessionManager.Exists(r.Context(), "id") {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
 		stmt := `
-				INSERT INTO task (is_complete, title, body, user_id, created_at, updated_at) VALUES 
-				(?, ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+				INSERT INTO task (is_complete, title, body, user_id, comment_id, created_at, updated_at) VALUES 
+				(?, ?, ?, ?,?, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 				`
 
 		var task models.Task
@@ -267,7 +280,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 
 		task.UserId = intID
 
-		result, err := app.DB.Exec(stmt, 0, title, body, task.UserId)
+		_, err = app.DB.Exec(stmt, 0, title, body, task.UserId, 0)
 
 		if err != nil {
 			fmt.Println(err)
@@ -275,9 +288,17 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println(result.LastInsertId())
+		http.Redirect(w, r, "/tasks", http.StatusSeeOther)
+		return
 
-		app.SessionManager.Put(r.Context(), "id", session)
 	}
 
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	_ = app.SessionManager.Destroy(r.Context())
+
+	_ = app.SessionManager.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

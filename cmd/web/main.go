@@ -59,7 +59,7 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(app.DB)
 	sessionManager.Lifetime = 12 * time.Hour
-
+	sessionManager.Cookie.Persist = true
 	app.SessionManager = sessionManager
 
 	srv := &http.Server{

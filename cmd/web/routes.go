@@ -21,8 +21,10 @@ func routes() http.Handler {
 
 	mux.Handle("/tasks", addSessionManager(http.HandlerFunc(handlers.GetAllTasks)))
 
+	mux.Handle("/logout", addSessionManager(http.HandlerFunc(handlers.Logout)))
+
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	return addDefaultHeaders(mux)
+	return pathToLowerCase(addDefaultHeaders(mux))
 
 }

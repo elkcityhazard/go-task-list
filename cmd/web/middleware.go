@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 func addDefaultHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -19,4 +22,12 @@ func addDefaultHeaders(next http.Handler) http.Handler {
 
 func addSessionManager(next http.Handler) http.Handler {
 	return app.SessionManager.LoadAndSave(next)
+}
+
+func pathToLowerCase(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = strings.ToLower(r.URL.Path)
+
+		next.ServeHTTP(w, r)
+	})
 }

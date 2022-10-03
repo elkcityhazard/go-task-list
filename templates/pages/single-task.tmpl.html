@@ -1,0 +1,46 @@
+{{ template "base" . }}
+
+
+{{ define "main" }}
+
+{{ with .Data }}
+<section class="tasks container mx-auto p-3">
+
+    <div class="row">
+        <div class="col-12 mx-auto p-3">
+            <ul class="list-group">
+                    <li class="list-group-item p-3 mb-3">
+                        <table>
+                            <tr>
+                                <th class=" me-2 p-2">ID</th>
+                                <th class=" me-2 p-2">Complete</th>
+                                <th class=" me-2 p-2">Title</th>
+                                <th class=" me-2 p-2">Body</th>
+                                <th class=" me-2 p-2">User ID</th>
+                                <th class=" me-2 p-2">Comment ID</th>
+                                <th class=" me-2 p-2">Created At</th>
+                                <th class=" me-2 p-2">Updated At</th>
+
+                            </tr>
+                            <tr>
+                                <td class="me-2 p-2">{{.Id }}</td>
+                                <td class="me-2 p-2">{{ .IsComplete }}</td>
+                                <td class="me-2 p-2">{{ .Title }}</td>
+                                <td class="me-2 p-2">{{ .Body }}</td>
+                                <td class="me-2 p-2">{{ .UserId }}</td>
+                                <td class="me-2 p-2">{{ .CommentId}}</td>
+                                <td class="me-2 p-2">{{ .CreatedAt }}</td>
+                                <td class="me-2 p-2"> {{ .UpdatedAt }}</td>
+                            </tr>
+                        </table>
+                    </li>
+            </ul>
+        </div>
+    </div>
+
+</section>
+
+
+{{ end }}
+
+{{ end }}

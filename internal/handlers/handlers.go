@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/elkcityhazard/go-task-list/internal/models"
@@ -176,6 +177,27 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 
+	var key = strings.TrimPrefix(r.URL.Path, "/tasks/")
+
+	if len(key) > 0 {
+
+		var task = &models.Task{}
+
+		task, err := task.FetchSingleTaskForUser(app, r, key)
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		render.RenderTemplate(w, r, "single-task.tmpl.html", &models.TemplateData{
+			Data: task,
+		})
+
+		return
+
+	}
+
 	if !app.SessionManager.Exists(r.Context(), "id") {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -184,7 +206,6 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 	session, ok := app.SessionManager.Get(r.Context(), "id").(string)
 
 	if !ok {
-		fmt.Println(session)
 		http.Error(w, "invalid session data", http.StatusInternalServerError)
 		return
 	}

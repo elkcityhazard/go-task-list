@@ -14,7 +14,7 @@ type Task struct {
 	Title      string
 	Body       string
 	UserId     int
-	CommentId  sql.NullInt32
+	CommentId  int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
@@ -25,7 +25,7 @@ func (t *Task) FetchAllTasksForUser(a *AppConfig, r *http.Request, uid string) (
 
 	session, ok := a.SessionManager.Get(r.Context(), "id").(string)
 
-	fmt.Println(session)
+	fmt.Println("Session ID: ", session)
 
 	if !ok {
 		err := errors.New("Error")
@@ -53,8 +53,6 @@ func (t *Task) FetchAllTasksForUser(a *AppConfig, r *http.Request, uid string) (
 
 		err := rows.Scan(&t.Id, &t.IsComplete, &t.Title, &t.Body, &t.UserId, &t.CommentId, &t.CreatedAt, &t.UpdatedAt)
 
-		fmt.Println(t)
-
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
@@ -70,4 +68,36 @@ func (t *Task) FetchAllTasksForUser(a *AppConfig, r *http.Request, uid string) (
 
 	return currentTasks, nil
 
+}
+
+func (t *Task) FetchSingleTaskForUser(a *AppConfig, r *http.Request, uid string) (*Task, error) {
+
+	session, ok := a.SessionManager.Get(r.Context(), "id").(string)
+
+	fmt.Println(session)
+
+	if !ok {
+		err := errors.New("Error")
+		return nil, err
+	}
+
+	stmt := `
+	SELECT * FROM task where task_id = ?;
+	`
+
+	row := a.DB.QueryRow(stmt, uid)
+
+	var task = &Task{}
+
+	err := row.Scan(&task.Id, &task.IsComplete, &task.Title, &task.Body, &task.UserId, &task.CommentId, &task.CreatedAt, &task.UpdatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, err
+		} else {
+			return nil, err
+		}
+	}
+
+	return task, nil
 }

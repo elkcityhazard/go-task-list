@@ -29,8 +29,8 @@
                                 <td class="me-2 p-2">{{ .Body }}</td>
                                 <td class="me-2 p-2">{{ .UserId }}</td>
                                 <td class="me-2 p-2">{{ .CommentId}}</td>
-                                <td class="me-2 p-2">{{ .CreatedAt }}</td>
-                                <td class="me-2 p-2"> {{ .UpdatedAt }}</td>
+                                <td class="me-2 p-2">{{ .CreatedAt | humanDate }}</td>
+                                <td class="me-2 p-2"> {{ .UpdatedAt | humanDate }}</td>
                             </tr>
                         </table>
                     </li>

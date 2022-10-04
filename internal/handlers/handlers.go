@@ -162,6 +162,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		err = app.SessionManager.RenewToken(r.Context())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
 		app.SessionManager.Put(r.Context(), "id", strconv.Itoa(user.Id))
 
 		http.Redirect(w, r, "/new-task", http.StatusSeeOther)

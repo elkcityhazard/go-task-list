@@ -7,11 +7,18 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/elkcityhazard/go-task-list/internal/models"
 )
 
-var funcMap template.FuncMap
+var funcMap = template.FuncMap{
+	"humanDate": humanDate,
+}
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
 
 var app *models.AppConfig
 

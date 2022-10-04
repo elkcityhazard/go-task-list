@@ -7,7 +7,7 @@
     {{ with .MainNavigation }}
 
     {{ range . }}
-    <a href="{{ .URL }}" class="{{ if and (eq $authVal 1)  ( eq .LoggedIn false) }} d-none {{ else }} d-inline  {{ end }}">{{ .Name }}</a>
+    <a href="{{ .URL }}" class="{{ if and (eq $authVal 1)  ( eq .LoggedIn false) }} d-none {{ else }} {{ if and (eq $authVal 0) ( eq .LoggedIn true )}} d-none {{else}} {{ end }} d-inline  {{ end }}">{{ .Name }}</a>
 
     {{ end }}
     {{ end }}

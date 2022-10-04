@@ -14,10 +14,27 @@ import (
 
 var funcMap = template.FuncMap{
 	"humanDate": humanDate,
+	"prevTask":  prevTask,
+	"nextTask":  nextTask,
 }
 
 func humanDate(t time.Time) string {
 	return t.Format("02 Jan 2006 at 15:04")
+}
+
+func prevTask(id int) int {
+	id = id - 1
+
+	if id < 1 {
+		return 1
+	}
+
+	return id
+}
+
+func nextTask(id int) int {
+	id = id + 1
+	return id
 }
 
 var app *models.AppConfig

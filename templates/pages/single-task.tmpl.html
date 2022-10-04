@@ -37,7 +37,12 @@
             </ul>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-12 col-md-6 mx-auto p-3">
+            <a href="/tasks/{{ .Id | prevTask}}" class="btn btn-info">Prev</a>
+            <a href="/tasks/{{ .Id | nextTask}}" class="btn btn-info">Next</a>
+        </div>
+    </div>
 </section>
 
 

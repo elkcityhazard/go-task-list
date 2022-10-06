@@ -2,14 +2,15 @@
 
 
 {{ define "main" }}
+{{ with index .Data "userTasks" }}
 
-{{ with .Data }}
 <section class="tasks container mx-auto p-3">
 
     <div class="row">
         <div class="col-12 mx-auto p-3">
             <ul class="list-group">
-                {{ range . }}
+                {{  range $i, $v := . }}
+
                     <li class="list-group-item p-3 mb-3">
                         <table>
                             <tr>
@@ -26,19 +27,20 @@
 
                             </tr>
                             <tr class="">
-                                <td class="me-2 p-2">{{.Id }}</td>
-                                <td class="me-2 p-2">{{ .IsComplete }}</td>
-                                <td class="me-2 p-2"><a href="/tasks/{{ .Id }}">{{ .Title }}</a></td>
-                                <td class="me-2 p-2">{{ .Body }}</td>
-                                <td class="me-2 p-2">{{ .UserId }}</td>
-                                <td class="me-2 p-2">{{ .CommentId}}</td>
-                                <td class="me-2 p-2">{{ .CreatedAt | humanDate }}</td>
-                                <td class="me-2 p-2"> {{ .UpdatedAt | humanDate }}</td>
-                                <td class="me-2 p-2 ms-auto"><a href="/admin/{{ .Id }}" class="btn btn-secondary">Update</a></td>
-                                <td class="me-2 p-2 ms-auto"><a href="/admin/{{ .Id }}" class="btn btn-danger">Delete</a></td>
+                                <td class="me-2 p-2">{{$v.Id }}</td>
+                                <td class="me-2 p-2">{{ $v.IsComplete }}</td>
+                                <td class="me-2 p-2"><a href="/tasks/{{ $i }}">{{ .Title }}</a></td>
+                                <td class="me-2 p-2">{{ $v.Body }}</td>
+                                <td class="me-2 p-2">{{ $v.UserId }}</td>
+                                <td class="me-2 p-2">{{ $v.CommentId}}</td>
+                                <td class="me-2 p-2">{{ $v.CreatedAt | humanDate }}</td>
+                                <td class="me-2 p-2"> {{ $v.UpdatedAt | humanDate }}</td>
+                                <td class="me-2 p-2 ms-auto"><a href="/admin/{{ $i }}" data-id="{{ $v.$Id }}" class="btn btn-secondary">Update</a></td>
+                                <td class="me-2 p-2 ms-auto"><a href="/admin/{{ $i }}" data-id="{{ $v.$Id }}" class="btn btn-danger">Delete</a></td>
                             </tr>
                         </table>
                     </li>
+
                 {{ end }}
             </ul>
         </div>

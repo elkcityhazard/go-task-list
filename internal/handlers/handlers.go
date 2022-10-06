@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,6 +34,8 @@ func GetSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostSignUp(w http.ResponseWriter, r *http.Request) {
+
+	app.UserTasks = []*models.Task{}
 
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
@@ -94,6 +98,8 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(strconv.Itoa(createdUser.Id))
 
+	app.SessionManager.RenewToken(r.Context())
+
 	app.SessionManager.Put(r.Context(), "id", strconv.Itoa(createdUser.Id))
 
 	render.RenderTemplate(w, r, "signed-up.tmpl.html", &models.TemplateData{
@@ -104,6 +110,7 @@ func PostSignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {
+	app.UserTasks = []*models.Task{}
 	if r.Method == "GET" {
 		GetSignUp(w, r)
 		return
@@ -117,6 +124,9 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+
+	app.UserTasks = []*models.Task{}
+
 	switch r.Method {
 	case "GET":
 		if app.SessionManager.Exists(r.Context(), "id") {
@@ -182,22 +192,105 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
+	app.UserTasks = []*models.Task{}
+
+	if !app.SessionManager.Exists(r.Context(), "id") {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+
+	if len(app.UserTasks) <= 0 {
+		task := models.Task{}
+
+		taskList, err := task.FetchAllTasksForUser(app, r, app.SessionManager.GetString(r.Context(), "id"))
+
+		if err != nil {
+			err = errors.New("error fetching task list")
+			log.Println(err)
+			return
+		}
+
+		app.UserTasks = taskList
+
+		if len(app.UserTasks) == 0 {
+			http.Redirect(w, r, "/new-task", http.StatusSeeOther)
+			return
+		}
+
+	}
 
 	var key = strings.TrimPrefix(r.URL.Path, "/tasks/")
 
 	if len(key) > 0 {
 
+		checkKey, err := strconv.Atoi(key)
+
+		if err != nil {
+			fmt.Println(err)
+			//http.Redirect(w, r, "/tasks/", http.StatusSeeOther)
+		}
+
+		if checkKey < 0 {
+			http.Redirect(w, r, fmt.Sprintf("/tasks/%d", 0), http.StatusSeeOther)
+		}
+
+		if checkKey > len(app.UserTasks)-1 {
+
+			maxLength := len(app.UserTasks) - 1
+
+			http.Redirect(w, r, fmt.Sprintf("/tasks/%d", maxLength), http.StatusSeeOther)
+		}
+
+		var taskList = app.UserTasks
+
+		for _, v := range taskList {
+			fmt.Println(v)
+		}
+
 		var task = &models.Task{}
 
-		task, err := task.FetchSingleTaskForUser(app, r, key)
+		intKey, err := strconv.Atoi(key)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		if intKey < 0 {
+			intKey = 0
+		}
+
+		if intKey >= len(app.UserTasks)-1 {
+			intKey = len(app.UserTasks) - 1
+		}
+
+		task = app.UserTasks[intKey]
+
+		if strconv.Itoa(task.UserId) != app.SessionManager.Get(r.Context(), "id") {
+			nextKey, err := strconv.Atoi(key)
+
+			if err != nil {
+				http.Redirect(w, r, "/tasks/", http.StatusSeeOther)
+				return
+			}
+
+			http.Redirect(w, r, fmt.Sprintf("/tasks/%d", nextKey-1), http.StatusSeeOther)
+			return
+		}
 
 		if err != nil {
 			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
 			return
 		}
 
+		payload := make(map[string]interface{})
+
+		payload["task"] = app.UserTasks[intKey]
+		payload["intKey"] = intKey
+		payload["length"] = len(app.UserTasks)
+		payload["lastIndex"] = len(app.UserTasks) - 1
+
 		render.RenderTemplate(w, r, "single-task.tmpl.html", &models.TemplateData{
-			Data: task,
+			Data: payload,
 		})
 
 		return
@@ -225,28 +318,35 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var task *models.Task
+	queryID := strconv.Itoa(query.Id)
 
-	taskList, err := task.FetchAllTasksForUser(app, r, fmt.Sprintf("%d", query.Id))
-
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
-		return
-	}
-
-	if len(taskList) <= 0 {
+	if !app.SessionManager.Exists(r.Context(), "id") {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	if app.SessionManager.GetString(r.Context(), "id") != queryID {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	var payload = make(map[string]interface{})
+
+	fmt.Println("before output", app.UserTasks)
+
+	if len(app.UserTasks) <= 0 {
+		http.Redirect(w, r, "/new-task", http.StatusSeeOther)
 		return
 	}
+
+	payload["userTasks"] = app.UserTasks
 
 	render.RenderTemplate(w, r, "task-list.tmpl.html", &models.TemplateData{
-		Data: taskList,
+		Data: payload,
 	})
 
 }
 
 func CreateTask(w http.ResponseWriter, r *http.Request) {
+	app.UserTasks = []*models.Task{}
 	switch r.Method {
 	case "GET":
 
@@ -320,6 +420,8 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		app.UserTasks = []*models.Task{}
+
 		http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 		return
 
@@ -328,9 +430,24 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
+	app.UserTasks = []*models.Task{}
 	_ = app.SessionManager.Destroy(r.Context())
 
 	_ = app.SessionManager.RenewToken(r.Context())
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func TaskAdmin(w http.ResponseWriter, r *http.Request) {
+	if !app.SessionManager.Exists(r.Context(), "id") {
+
+		err := app.SessionManager.RenewToken(r.Context())
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/login", http.StatusMethodNotAllowed)
+	}
 }

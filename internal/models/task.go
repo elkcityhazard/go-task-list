@@ -33,7 +33,7 @@ func (t *Task) FetchAllTasksForUser(a *AppConfig, r *http.Request, uid string) (
 	}
 
 	stmt := `
-		SELECT * FROM task where user_id = ?;	
+		SELECT * FROM task where user_id = ? ORDER BY created_at ASC;	
 	`
 
 	rows, err := a.DB.Query(stmt, uid)

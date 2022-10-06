@@ -3,7 +3,14 @@
 
 {{ define "main" }}
 
-{{ with .Data }}
+{{ $intKey := index .Data "intKey" }}
+
+{{ $length := index .Data "length" }}
+
+{{ $list := index .Data "task" }}
+{{ $lastIndex := index .Data "lastIndex"}}
+
+{{ with index .Data "task" }}
 <section class="tasks container mx-auto p-3">
 
     <div class="row">
@@ -38,9 +45,17 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12 col-md-6 mx-auto p-3">
-            <a href="/tasks/{{ .Id | prevTask}}" class="btn btn-info">Prev</a>
-            <a href="/tasks/{{ .Id | nextTask}}" class="btn btn-info">Next</a>
+        <div class="col-12 col-md-6 mx-auto p-3 text-center">
+            {{ if (ne  $intKey 0 )}}
+            <a href="/tasks/{{ $intKey | prevTask}}" data-index="{{$intKey}}" class="btn btn-info">Prev</a>
+            {{ else }}
+            <button class="btn btn-info" disabled>Prev</button>
+            {{ end }}
+            {{ if (ge $intKey $lastIndex) }}
+            <button class="btn btn-info" disabled>Prev</button>
+            {{ else }}
+            <a href="/tasks/{{ $intKey | nextTask}}" class="btn btn-info">Next</a>
+            {{ end }}
         </div>
     </div>
 </section>

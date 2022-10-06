@@ -19,22 +19,34 @@ var funcMap = template.FuncMap{
 }
 
 func humanDate(t time.Time) string {
+
 	return t.Format("02 Jan 2006 at 15:04")
 }
 
 func prevTask(id int) int {
-	id = id - 1
 
-	if id < 1 {
-		return 1
+	length := len(app.UserTasks)
+
+	if id <= 0 {
+		return 0
 	}
 
-	return id
+	if id > length-1 {
+		return id + 1
+	}
+
+	return id - 1
 }
 
 func nextTask(id int) int {
-	id = id + 1
-	return id
+
+	length := len(app.UserTasks)
+
+	if id > length-1 {
+		return length - 1
+	}
+
+	return id + 1
 }
 
 var app *models.AppConfig

@@ -21,6 +21,8 @@ func routes() http.Handler {
 
 	mux.Handle("/tasks/", addSessionManager(http.HandlerFunc(handlers.GetAllTasks)))
 
+	mux.Handle("/admin/", addSessionManager((http.HandlerFunc(handlers.TaskAdmin))))
+
 	mux.Handle("/logout", addSessionManager(http.HandlerFunc(handlers.Logout)))
 
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))

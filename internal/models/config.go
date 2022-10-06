@@ -11,7 +11,7 @@ type TemplateData struct {
 	SiteTitle       string
 	Title           string
 	MainNavigation  []NavItem
-	Data            interface{}
+	Data            map[string]interface{}
 	StringMap       map[string]string
 	UserMap         map[string]User
 	IsAuthenticated int
@@ -26,6 +26,7 @@ type AppConfig struct {
 	DB             *sql.DB
 	IsProduction   bool
 	SessionManager *scs.SessionManager
+	UserTasks      []*Task
 }
 
 type NavItem struct {

@@ -439,6 +439,54 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func TaskAdmin(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+
+	if err != nil {
+		http.Error(w, "error parsing form", http.StatusInternalServerError)
+		return
+	}
+
+	method := r.FormValue("method")
+
+	method = strings.ToLower(method)
+
+	switch method {
+
+	case "delete":
+		checkSession(w, r)
+
+		err := r.ParseForm()
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		id := r.Form.Get("id")
+
+		stmt := `DELETE FROM task WHERE task_id = ?;`
+
+		result, err := app.DB.Exec(stmt, id)
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		} else {
+			app.UserTasks = []*models.Task{}
+		}
+
+		fmt.Println(result.RowsAffected())
+
+		http.Redirect(w, r, "/tasks/", http.StatusSeeOther)
+		return
+
+	}
+
+}
+
+func checkSession(w http.ResponseWriter, r *http.Request) {
+
 	if !app.SessionManager.Exists(r.Context(), "id") {
 
 		err := app.SessionManager.RenewToken(r.Context())
@@ -450,4 +498,5 @@ func TaskAdmin(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/login", http.StatusMethodNotAllowed)
 	}
+
 }

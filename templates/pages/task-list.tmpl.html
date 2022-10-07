@@ -2,6 +2,24 @@
 
 
 {{ define "main" }}
+
+<div class="custom-modal mx-auto p-3 text-center d-none" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <header>
+        <div class="row">
+            <div class="col-12 text-center p-3">
+                <p class="message">Message</p>
+            </div>
+        </div>
+    </header>
+    <div class="row">
+        <div class="col-12 text-center">
+            <button id="yes" type="submit">Yes</button>
+            <button id="no" type="reset">No</button>
+        </div>
+    </div>
+
+</div>
+
 {{ with index .Data "userTasks" }}
 
 <section class="tasks container mx-auto p-3">
@@ -35,8 +53,17 @@
                                 <td class="me-2 p-2">{{ $v.CommentId}}</td>
                                 <td class="me-2 p-2">{{ $v.CreatedAt | humanDate }}</td>
                                 <td class="me-2 p-2"> {{ $v.UpdatedAt | humanDate }}</td>
-                                <td class="me-2 p-2 ms-auto"><a href="/admin/{{ $i }}" data-id="{{ $v.$Id }}" class="btn btn-secondary">Update</a></td>
-                                <td class="me-2 p-2 ms-auto"><a href="/admin/{{ $i }}" data-id="{{ $v.$Id }}" class="btn btn-danger">Delete</a></td>
+                                <td class="me-2 p-2 ms-auto">
+                                    <form action="/admin/{{$v.Id}}" method="put">
+                                        <input type="submit" value="EDIT" name="id" class="btn btn-info">
+                                    </form>
+                                <td class="me-2 p-2 ms-auto">
+                                <form action="/admin/{{$v.Id}}" method="delete">
+                                    <input type="string" name="method" value="delete" hidden>
+                                    <input type="number" name="id" id="task_id" value="{{ $v.Id}}" hidden>
+                                    <input type="submit" value="DELETE" name="id" class="btn btn-danger">
+                                </form>
+                            </td>
                             </tr>
                         </table>
                     </li>
@@ -47,6 +74,32 @@
     </div>
 
 </section>
+
+<script>
+    const modal = document.querySelector(".custom-modal")
+    const deleteButton = document.getElementById("delete")
+    const putButton = document.getElementById("put")
+
+
+
+
+    // deleteButton.addEventListener("click", async (e) => {
+    //     e.preventDefault()
+    //
+    //     const id = e.target.getAttribute("data-id")
+    //
+    //     const request = await fetch(`/admin/${id}`, {
+    //         method: "delete",
+    //     })
+    //
+    //     const response = await request.status
+    //
+    //
+    // })
+
+
+
+</script>
 
 
 {{ end }}

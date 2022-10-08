@@ -101,3 +101,21 @@ func (t *Task) FetchSingleTaskForUser(a *AppConfig, r *http.Request, uid string)
 
 	return task, nil
 }
+
+func (t *Task) DeleteSingleTask(a *AppConfig, r *http.Request, uid string) (sql.Result, error) {
+	if !a.SessionManager.Exists(r.Context(), "id") {
+		err := errors.New("invalid operation")
+
+		return nil, err
+	}
+
+	stmt := `DELETE FROM task WHERE task_id = ?;`
+
+	result, err := a.DB.Exec(stmt, uid)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

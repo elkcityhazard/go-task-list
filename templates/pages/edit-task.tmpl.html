@@ -1,0 +1,45 @@
+{{ template "base" . }}
+
+
+{{ define "main" }}
+
+{{ $data := index .Data "task" }}
+
+{{  with $data }}
+
+<section class="container mx-auto p-3">
+    <div class="row">
+        <div class="col-12 col-md-9 mx-auto p-3">
+            <table>
+                <tr>
+                    <th class=" me-2 p-2">Complete</th>
+                    <th class=" me-2 p-2">Title</th>
+                    <th class=" me-2 p-2">Body</th>
+                    <th class=" me-2 p-2">User ID</th>
+                    <th class=" me-2 p-2">Comment ID</th>
+                    <th class=" me-2 p-2">Created At</th>
+                    <th class=" me-2 p-2">Updated At</th>
+
+                </tr>
+                <tr>
+                    <form action="/admin/update/{{ .Id }}" method="POST">
+                        <td class="me-2 p-2">
+                            <label for="isComplete">Is Complete: <input type="checkbox" name="isComplete" id="task_status" placeholder="true"></label>
+                        </td>
+                    </form>
+                    <td class="me-2 p-2">{{ .IsComplete }}</td>
+                    <td class="me-2 p-2">{{ .Title }}</td>
+                    <td class="me-2 p-2">{{ .Body }}</td>
+                    <td class="me-2 p-2">{{ .UserId }}</td>
+                    <td class="me-2 p-2">{{ .CommentId}}</td>
+                    <td class="me-2 p-2">{{ .CreatedAt | humanDate }}</td>
+                    <td class="me-2 p-2"> {{ .UpdatedAt | humanDate }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+{{ end }}
+
+{{ end }}

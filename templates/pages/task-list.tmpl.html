@@ -54,12 +54,12 @@
                                 <td class="me-2 p-2">{{ $v.CreatedAt | humanDate }}</td>
                                 <td class="me-2 p-2"> {{ $v.UpdatedAt | humanDate }}</td>
                                 <td class="me-2 p-2 ms-auto">
-                                    <form action="/admin/{{$v.Id}}" method="put">
-                                        <input type="submit" value="EDIT" name="id" class="btn btn-info">
-                                    </form>
+                                    <a href="/admin/{{$v.Id}}" class="btn btn-info">EDIT</a>
+                                       
+                                    </td>
                                 <td class="me-2 p-2 ms-auto">
                                 <form action="/admin/{{$v.Id}}" method="delete">
-                                    <input type="string" name="method" value="delete" hidden>
+                                    <input type="string" name="_method" value="delete" hidden>
                                     <input type="number" name="id" id="task_id" value="{{ $v.Id}}" hidden>
                                     <input type="submit" value="DELETE" name="id" class="btn btn-danger">
                                 </form>

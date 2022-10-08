@@ -440,6 +440,27 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 func TaskAdmin(w http.ResponseWriter, r *http.Request) {
 
+	if r.Method == "GET" {
+		var task *models.Task
+
+		task, err := task.FetchSingleTaskForUser(app, r, r.URL.Path[len("/admin/"):])
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		data := make(map[string]interface{})
+
+		data["task"] = task
+
+		fmt.Println(data["task"])
+
+		render.RenderTemplate(w, r, "edit-task.tmpl.html", &models.TemplateData{
+			Data: data,
+		})
+	}
+
 	err := r.ParseForm()
 
 	if err != nil {
@@ -447,7 +468,7 @@ func TaskAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	method := r.FormValue("method")
+	method := r.FormValue("_method")
 
 	method = strings.ToLower(method)
 
@@ -465,22 +486,19 @@ func TaskAdmin(w http.ResponseWriter, r *http.Request) {
 
 		id := r.Form.Get("id")
 
-		stmt := `DELETE FROM task WHERE task_id = ?;`
+		var task *models.Task
 
-		result, err := app.DB.Exec(stmt, id)
+		result, err := task.DeleteSingleTask(app, r, id)
 
 		if err != nil {
 			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
 			return
-		} else {
-			app.UserTasks = []*models.Task{}
 		}
 
-		fmt.Println(result.RowsAffected())
+		fmt.Println(result)
 
 		http.Redirect(w, r, "/tasks/", http.StatusSeeOther)
 		return
-
 	}
 
 }

@@ -6,25 +6,34 @@ import (
 )
 
 type Comment struct {
-	Id        int
+	ID        int
+	UserId    int
 	Title     string
 	Body      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	UserId    int
-	User      User
+	CommentId int
 }
 
-func (c *Comment) CreateComment(a *AppConfig, title string, body string, createdAt time.Time, updatedAt time.Time, id int) (sql.Result, error) {
+func (c *Comment) NewComment(a *AppConfig, userId int, title string, body string, taskId int) (sql.Result, error) {
+	c.UserId = userId
+	c.Title = title
+	c.Body = body
+	c.CreatedAt = time.Now()
+	c.UpdatedAt = time.Now()
+	c.CommentId = taskId
 
-	stmt := `INSERT INTO comment (title, body, created_at, updated_at, user_id) VALUES (?,?,?,?,?);`
+	stmt := `
+	INSERT INTO comment (user_id, title, body, comment_id) VALUES (?, ?, ?, ?);
+`
 
-	result, err := a.DB.Exec(stmt, title, body, createdAt, updatedAt, id)
+	result, err := a.DB.Exec(stmt, c.UserId, c.Title, c.Body, c.CommentId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	a.UserTasks = []*Task{}
 
+	return result, nil
 }

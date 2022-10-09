@@ -289,6 +289,41 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 		payload["length"] = len(app.UserTasks)
 		payload["lastIndex"] = len(app.UserTasks) - 1
 
+		commentStmt := `
+						SELECT * FROM comment where comment_id = ?;
+						`
+
+		result, err := app.DB.Query(commentStmt, task.Id)
+
+		if err != nil {
+			http.Error(w, "error processing comment fetch", http.StatusInternalServerError)
+			return
+		}
+
+		defer result.Close()
+
+		var commentList []*models.Comment
+
+		for result.Next() {
+
+			c := &models.Comment{}
+
+			err := result.Scan(&c.ID, &c.UserId, &c.Title, &c.Body, &c.CreatedAt, &c.UpdatedAt, &c.CommentId)
+
+			if err != nil {
+				return
+			}
+
+			commentList = append(commentList, c)
+
+		}
+
+		if err = result.Err(); err != nil {
+			return
+		}
+
+		payload["comments"] = commentList
+
 		render.RenderTemplate(w, r, "single-task.tmpl.html", &models.TemplateData{
 			Data: payload,
 		})
@@ -573,4 +608,63 @@ func checkSession(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusMethodNotAllowed)
 	}
 
+}
+
+func CreateComment(w http.ResponseWriter, r *http.Request) {
+
+	switch strings.ToUpper(r.Method) {
+	case "POST":
+
+		// handle task ID
+		taskID := r.URL.Path[len("/tasks/comment/"):]
+
+		if !app.SessionManager.Exists(r.Context(), "id") {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		if taskID == "" {
+			http.Error(w, "error processing taskID request", http.StatusInternalServerError)
+			return
+		}
+
+		//	Handle User ID
+
+		userID := app.SessionManager.Get(r.Context(), "id").(string)
+		if userID == "" {
+			http.Error(w, "error processing ID request", http.StatusInternalServerError)
+			return
+		}
+
+		err := r.ParseForm()
+
+		if err != nil {
+			http.Error(w, "error processing Form request", http.StatusInternalServerError)
+			return
+		}
+
+		title := r.Form.Get("title")
+		taskComment := r.Form.Get("comment")
+
+		var comment models.Comment
+
+		comment.Title = title
+		comment.Body = taskComment
+		comment.CreatedAt = time.Now()
+		comment.UpdatedAt = time.Now()
+		comment.CommentId, _ = strconv.Atoi(taskID)
+		comment.UserId, _ = strconv.Atoi(userID)
+
+		result, err := comment.NewComment(app, comment.UserId, comment.Title, comment.Body, comment.CommentId)
+
+		if err != nil {
+			http.Error(w, "error processing new comment db request request", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println(result)
+
+		http.Redirect(w, r, fmt.Sprintf("/tasks/%s", taskID), http.StatusSeeOther)
+
+	}
 }

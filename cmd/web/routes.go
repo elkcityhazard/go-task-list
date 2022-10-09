@@ -22,6 +22,7 @@ func routes() http.Handler {
 	mux.Handle("/tasks/", addSessionManager(http.HandlerFunc(handlers.GetAllTasks)))
 
 	mux.Handle("/admin/", addSessionManager(http.HandlerFunc(handlers.TaskAdmin)))
+	mux.Handle("/admin/update/", addSessionManager(http.HandlerFunc(handlers.UpdateTask)))
 
 	mux.Handle("/logout", addSessionManager(http.HandlerFunc(handlers.Logout)))
 

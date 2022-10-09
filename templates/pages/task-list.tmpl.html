@@ -1,5 +1,8 @@
 {{ template "base" . }}
 
+{{ define "title" }}
+    {{ index .Data "userTasks" 0 }}
+{{ end }}
 
 {{ define "main" }}
 

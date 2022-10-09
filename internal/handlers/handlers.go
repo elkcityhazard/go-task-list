@@ -503,6 +503,62 @@ func TaskAdmin(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func UpdateTask(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case "POST":
+		err := r.ParseForm()
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		id := r.URL.Path[len("/admin/update/"):]
+		status := r.Form.Get("status")
+		title := r.Form.Get("title")
+		body := r.Form.Get("body")
+
+		if id == "" || title == "" || body == "" {
+			http.Error(w, "sorry something went wrong", http.StatusInternalServerError)
+			return
+		}
+
+		if status == "on" {
+			status = strconv.Itoa(1)
+		} else {
+			status = strconv.Itoa(0)
+		}
+
+		fmt.Println(status)
+
+		if !app.SessionManager.Exists(r.Context(), "id") {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		stmt := `UPDATE task 
+				SET is_complete = ?, 
+					title = ?, 
+					body = ?, 
+					updated_at = NOW()
+				WHERE task_id = ?;`
+
+		result, err := app.DB.Exec(stmt, status, title, body, id)
+
+		if err != nil {
+			http.Error(w, fmt.Sprintf("%s", err), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println(result)
+
+		http.Redirect(w, r, "/tasks/", http.StatusSeeOther)
+
+	}
+
+}
+
 func checkSession(w http.ResponseWriter, r *http.Request) {
 
 	if !app.SessionManager.Exists(r.Context(), "id") {

@@ -47,24 +47,6 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-9 mx-auto text-center">
-            <h2 class="text-center">Comments</h2>
-        </div>
-    </div>
-    {{ range $comments }}
-    <div class="row">
-        <div class="col-12 col-md-9 mx-auto p-3">
-            <ul class="list-group">
-                <li class="list-group-item"><strong>Title: </strong>{{ .Title }}</li>
-                <li class="list-group-item"><strong>Comment: </strong>{{ .Body }}</li>
-                <li class="list-group-item"><strong>User: </strong> {{ .UserId }}</li>
-                <li class="list-group-item"><strong>Created At: </strong> {{ .CreatedAt | humanDate }}</li>
-                <li class="list-group-item"><strong>Updated At: </strong> {{ .UpdatedAt | humanDate  }}</li>
-            </ul>
-        </div>
-    </div>
-    {{ end }}
-    <div class="row">
         <div class="col-12 col-md-6 mx-auto p-3 text-center">
             {{ if (ne  $intKey 0 )}}
             <a href="/tasks/{{ $intKey | prevTask}}" data-index="{{$intKey}}" class="btn btn-info">Prev</a>
@@ -83,7 +65,7 @@
 <section class="container mx-auto p-3 text-center">
     <div class="row">
         <div class="col 12 col-md-9 col-lg-6">
-            <h3 class="text-center">Add A Comment</h3>
+            <h3 class="text-center d-block w-100">Add A Comment</h3>
             <form action="/tasks/comment/{{ .Id }}" method="post">
                 <div class="form-control">
                     <label for="title" class="d-block w-100">
@@ -103,6 +85,25 @@
             </form>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-9 mx-auto text-center">
+            <h2 class="text-center">Comments</h2>
+        </div>
+    </div>
+    {{ range $comments }}
+    <div class="row">
+        <div class="col-12 col-md-9 mx-auto p-3">
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Title: </strong>{{ .Title }}</li>
+                <li class="list-group-item"><strong>Comment: </strong>{{ .Body }}</li>
+                <li class="list-group-item"><strong>User: </strong> {{ .UserId }}</li>
+                <li class="list-group-item"><strong>Created At: </strong> {{ .CreatedAt | humanDate }}</li>
+                <li class="list-group-item"><strong>Updated At: </strong> {{ .UpdatedAt | humanDate  }}</li>
+            </ul>
+        </div>
+    </div>
+    {{ end }}
 </section>
 
 

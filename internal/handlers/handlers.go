@@ -664,7 +664,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println(result)
 
-		http.Redirect(w, r, fmt.Sprintf("/tasks/%s", taskID), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("%s", r.Referer()), http.StatusSeeOther)
 
 	}
 }
